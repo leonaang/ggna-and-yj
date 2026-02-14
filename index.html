@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Y & G Wedding</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+/* RSVP CENTERING */
+#rsvp{
+  text-align: center;
+}
+
+.rsvp-wrapper{
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.rsvp-wrapper iframe{
+  width: 100%;
+  max-width: 760px;
+  height: 1150px; /* adjust if your form is longer */
+  border: none;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 25px 70px rgba(0,0,0,0.10);
+}
+
+
+/* ======================
+   GLOBAL / BACKDROP
+   ====================== */
+body{
+  margin: 0;
+  font-family: 'Lato', sans-serif;
+  background: radial-gradient(circle at top, #f9d8e3 0%, #f4c3d2 55%, #f1bccd 100%);
+  overflow-x: hidden;
+  color: #4a3f3f;
+}
+
+/* ======================
+   FLOATING FLOWERS (AUTO)
+   ====================== */
+#flowerLayer{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.flower{
+  position: absolute;
+  top: 110vh;
+  width: 70px;
+  opacity: 0.6;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 10px 12px rgba(0,0,0,0.10));
+  animation:
+    floatUp var(--dur, 14s) linear infinite,
+    swayX var(--swayDur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s), var(--delay, 0s);
+  transform: translate3d(var(--x, 0px), 0, 0) rotate(var(--rot, 0deg));
+}
+
+@keyframes floatUp{
+  0%   { transform: translate3d(var(--x, 0px), 0, 0) rotate(var(--rot, 0deg)); opacity: 0; }
+  8%   { opacity: var(--op, 0.65); }
+  100% { transform: translate3d(calc(var(--x, 0px) + var(--drift, 0px)), -130vh, 0) rotate(calc(var(--rot, 0deg) + 360deg)); opacity: 0; }
+}
+
+@keyframes swayX{
+  0%, 100% { margin-left: 0px; }
+  50%      { margin-left: var(--sway, 18px); }
+}
+
+/* ======================
+   MAIN "MENU CARD"
+   ====================== */
+#main{
+  position: relative;
+  z-index: 1;
+}
+
+/* Center textured insert like a menu */
+.menu-card{
+  width: min(940px, 92vw);
+  margin: 90px auto;
+  padding: clamp(44px, 6vw, 84px) clamp(20px, 5vw, 70px);
+  border-radius: 18px;
+
+  background-color: #fff8fb;
+
+  background-image: url('envelope_bg 1.png');
+  background-repeat: repeat;
+  background-size: auto 220px;
+  background-position: top center;
+
+  box-shadow: 0 30px 90px rgba(0,0,0,0.12);
+  border: 1px solid rgba(199,140,159,0.25);
+  position: relative;
+}
+
+/* subtle inner border for "printed card" vibe */
+.menu-card::before{
+  content:"";
+  position:absolute;
+  inset: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(199,140,159,0.22);
+  pointer-events: none;
+}
+
+/* ======================
+   SECTIONS / TYPOGRAPHY
+   ====================== */
+section{
+  padding: 70px 10px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
+}
+section.show{ opacity: 1; transform: translateY(0); }
+
+h1,h2{ font-family: 'Playfair Display', serif; }
+
+.script{
+  font-family: 'Great Vibes', cursive;
+  font-size: 3rem;
+  color: #c48c9f;
+}
+
+/* HERO COVER */
+.hero{
+  min-height: 520px;
+  border-radius: 16px;
+  background:
+    linear-gradient(rgba(255,255,255,0.55),rgba(255,255,255,0.55)),
+    url('page_cover.jpg') center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 20px;
+}
+.hero h1{ font-size: 3rem; margin: 10px 0 0; }
+#countdown{ margin-top: 20px; font-size: 1.2rem; color: #b76e79; }
+
+/* GALLERY */
+.gallery{
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 15px;
+}
+.gallery img{
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Map only */
+section > iframe{
+  width: 100%;
+  max-width: 680px;
+  height: 500px;
+  border: none;
+  border-radius: 12px;
+}
+
+
+/* =========================
+   ENVELOPE INTRO (3 LAYERS)
+   ========================= */
+#intro{
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, #f4e5ea 0%, #f2dfe6 45%, #f0d9e1 100%);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  perspective: 1200px;
+  transition: opacity 700ms ease;
+}
+
+.envelope-stage{
+  width: min(520px, 92vw);
+  aspect-ratio: 4 / 3;
+  position: relative;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 18px 40px rgba(0,0,0,0.22));
+}
+
+.envelope{
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* base background */
+.envelope-bg{
+  position: absolute;
+  inset: 0;
+  background: url('envelope_bg.png') center/cover no-repeat;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* flap + seal hinge container */
+.flap-assembly{
+  position: absolute;
+  left: -4%;
+  top: -20%;
+  width: 108%;
+  height: 120%;
+  transform-origin: 50% 17%;
+  transform: rotateX(0deg);
+  transform-style: preserve-3d;
+  transition: transform 1000ms cubic-bezier(.2,.9,.2,1);
+  will-change: transform;
+  z-index: 3;
+}
+
+/* flap image */
+.envelope-flap{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  display: block;
+}
+
+/* wax seal */
+.wax-seal{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translateZ(1px);
+  width: min(170px, 34vw);
+  height: auto;
+  cursor: pointer;
+  z-index: 4;
+  transition: transform 240ms ease, filter 240ms ease, opacity 300ms ease;
+  will-change: transform, opacity;
+}
+.wax-seal:hover{
+  transform: translate(-50%, -50%) translateZ(1px) scale(1.03);
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.22));
+}
+
+/* instruction text */
+.intro-hint{
+  position: absolute;
+  left: 50%;
+  bottom: -58px;
+  transform: translateX(-50%);
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+  color: rgba(74,63,63,0.75);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* OPEN STATES */
+#intro.opening .wax-seal{ pointer-events: none; }
+#intro.opening .flap-assembly{ transform: rotateX(-165deg); }
+
+/* fade the whole intro away after flap opens */
+#intro.hidden{
+  opacity: 0;
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- INTRO SCREEN (ENVELOPE) -->
+<div id="intro" aria-label="Invitation envelope intro">
+  <div class="envelope-stage">
+    <div class="envelope" id="envelope">
+      <div class="envelope-bg"></div>
+
+      <!-- flap + seal as ONE hinged piece -->
+      <div class="flap-assembly" id="flapAssembly">
+        <img class="envelope-flap" src="envelope_flap.png" alt="Envelope flap">
+        <img class="wax-seal" id="sealBtn" src="wax_seal.png" alt="Wax seal (click to open)" role="button" tabindex="0">
+      </div>
+
+      <div class="intro-hint">Click the seal to open</div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING FLOWERS (generated) -->
+<div id="flowerLayer" aria-hidden="true"></div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+  <div class="menu-card">
+
+    <section class="hero">
+      <div class="script">Y & G</div>
+      <h1>We Are Getting Married</h1>
+      <p>19 September 2026</p>
+      <div id="countdown"></div>
+    </section>
+
+    <section>
+      <h2>Our Love Story</h2>
+      <p>"Two souls with but a single thought, two hearts that beat as one."</p>
+    </section>
+
+    <section>
+      <h2>The Date</h2>
+      <p>Saturday, 19 September, 2026</p>
+    </section>
+
+    <section>
+      <h2>Event Details</h2>
+      <p>Ceremony – 3:00 PM</p>
+      <p>Reception – 6:00 PM</p>
+      <p>Rosewood Garden Hall</p>
+    </section>
+
+    <section>
+      <h2>Gallery</h2>
+      <div class="gallery">
+        <img src="gallery_1.jpg" alt="Gallery photo 1">
+        <img src="gallery_2.jpg" alt="Gallery photo 2">
+        <img src="gallery_3.jpg" alt="Gallery photo 3">
+      </div>
+    </section>
+
+    <section>
+      <h2>Location</h2>
+      <iframe src="https://www.google.com/maps?q=Rosewood%20Garden%20Hall&output=embed" title="Map"></iframe>
+    </section>
+
+    <section id="rsvp">
+      <h2>RSVP</h2>
+
+      <div class="rsvp-wrapper">
+        <iframe 
+          src="https://docs.google.com/forms/d/e/1FAIpQLSd9vUciINOCa9k5nzgkSkHYx3xFRJ_Bzm14yD01nksB0Dq_eg/viewform?embedded=true"
+          loading="lazy"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+
+<audio id="music" loop>
+  <source src="lover.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* --- FLOATING FLOWERS (SIDE ONLY) --- */
+const flowerLayer = document.getElementById("flowerLayer");
+const FLOWER_SRC = "pink_rose_animation.png";
+
+function rand(min, max){
+  return Math.random() * (max - min) + min;
+}
+
+function getSidePositionVW() {
+  const menu = document.querySelector(".menu-card");
+  const menuRect = menu.getBoundingClientRect();
+
+  const screenWidth = window.innerWidth;
+  const menuLeft = menuRect.left;
+  const menuRight = menuRect.right;
+
+  const leftSideWidth = menuLeft;
+  const rightSideWidth = screenWidth - menuRight;
+
+  // randomly choose left or right side
+  const useLeft = Math.random() > 0.5;
+
+  if (useLeft && leftSideWidth > 40) {
+    return rand(0, menuLeft - 20) / screenWidth * 100;
+  }
+
+  if (!useLeft && rightSideWidth > 40) {
+    return rand(menuRight + 20, screenWidth) / screenWidth * 100;
+  }
+
+  // fallback (if very small screen)
+  return rand(0, 100);
+}
+
+function spawnFlower() {
+  const img = document.createElement("img");
+  img.src = FLOWER_SRC;
+  img.className = "flower";
+
+  const size = rand(38, 85);
+  const dur = rand(12, 22);
+  const delay = rand(-dur, 0);
+  const opacity = rand(0.3, 0.7);
+  const drift = rand(-40, 40);
+  const sway = rand(-20, 20);
+  const swayDur = rand(3, 6);
+  const rot = rand(0, 360);
+
+  const leftVW = getSidePositionVW();
+
+  img.style.left = leftVW + "vw";
+  img.style.width = size + "px";
+  img.style.setProperty("--dur", dur + "s");
+  img.style.setProperty("--delay", delay + "s");
+  img.style.setProperty("--op", opacity);
+  img.style.setProperty("--drift", drift + "px");
+  img.style.setProperty("--sway", sway + "px");
+  img.style.setProperty("--swayDur", swayDur + "s");
+  img.style.setProperty("--rot", rot + "deg");
+  img.style.setProperty("--x", rand(-10, 10) + "px");
+
+  flowerLayer.appendChild(img);
+}
+
+function fillFlowers() {
+  flowerLayer.innerHTML = "";
+
+  const isMobile = window.matchMedia("(max-width: 600px)").matches;
+  const count = isMobile ? 10 : 22;
+
+  for (let i = 0; i < count; i++) {
+    spawnFlower();
+  }
+}
+
+fillFlowers();
+
+window.addEventListener("resize", () => {
+  clearTimeout(window.__flowerResizeTimer);
+  window.__flowerResizeTimer = setTimeout(fillFlowers, 200);
+});
+
+/* --- ENVELOPE OPEN (wax seal click) --- */
+const intro = document.getElementById("intro");
+const sealBtn = document.getElementById("sealBtn");
+const music = document.getElementById("music");
+let opened = false;
+
+function openInvitation() {
+  if (opened) return;
+  opened = true;
+
+  intro.classList.add("opening");
+  music.play().catch(()=>{});
+
+  window.setTimeout(() => {
+    intro.classList.add("hidden");
+  }, 950);
+
+  window.setTimeout(() => {
+    intro.style.display = "none";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, 1550);
+}
+
+sealBtn.addEventListener("click", openInvitation);
+sealBtn.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    openInvitation();
+  }
+});
+
+/* Countdown */
+const weddingDate = new Date("September 19, 2026 15:00:00").getTime();
+setInterval(() => {
+  const now = new Date().getTime();
+  const diff = weddingDate - now;
+
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24))/(1000*60*60));
+  const minutes = Math.floor((diff % (1000*60*60))/(1000*60));
+
+  document.getElementById("countdown").innerHTML =
+    days + " Days " + hours + " Hours " + minutes + " Minutes";
+}, 1000);
+
+/* Scroll Animation */
+const sections = document.querySelectorAll("section");
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) entry.target.classList.add("show");
+  });
+}, {threshold:0.2});
+sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>
